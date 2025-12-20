@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-cxx-builder"
+version = "0.1.0"
+description = "Build C++ extensions for Python with cross-platform support (MSVC/GCC)"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "swigger", email = "swigger@gmail.com" }
+]
+requires-python = ">=3.10"
+keywords = ["c++", "extension", "build", "setuptools", "msvc", "gcc"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: C++",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Compilers",
+]
+
+dependencies = [
+  "setuptools>=61.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/swigger/py-cxx-builder"
+Repository = "https://github.com/swigger/py-cxx-builder"
+Issues = "https://github.com/swigger/py-cxx-builder/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
