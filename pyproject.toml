@@ -7,7 +7,7 @@ name = "py-cxx-builder"
 version = "0.1.0"
 description = "Build C++ extensions for Python with cross-platform support (MSVC/GCC)"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
   { name = "swigger", email = "swigger@gmail.com" }
 ]
@@ -16,7 +16,6 @@ keywords = ["c++", "extension", "build", "setuptools", "msvc", "gcc"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
@@ -32,7 +31,8 @@ classifiers = [
 ]
 
 dependencies = [
-  "setuptools>=61.0"
+  "setuptools>=61.0",
+  "tomli>=2.0; python_version < '3.11'"
 ]
 
 [project.optional-dependencies]
