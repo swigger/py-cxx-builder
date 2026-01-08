@@ -109,13 +109,17 @@ class ModiGCC:
                 return fn
         return "-l" + libname
 
+    def quote(self, s):
+        _ = self
+        return json.dumps(s)
+
     def compile_cmd(self, blder, inputfn, output):
         _ = self
         opts = []
         for d in blder.include_dirs:
             opts.append("-I%s" % d)
         for m in blder.macros:
-            opts.append("-D%s=%s" % m)
+            opts.append("-D%s=%s" % (m[0], self.quote(m[1])))
         opts += blder.extra_compile_args
         return "gcc -c %s -o %s %s" % (" ".join(opts), output, inputfn)
 
@@ -134,7 +138,7 @@ class ModiGCC:
         for d in blder.include_dirs:
             cmd += "-I%s " % d
         for m in blder.macros:
-            cmd += "-D%s=%s " % m
+            cmd += "-D%s=%s " % (m[0], self.quote(m[1]))
         cmd += " ".join(blder.extra_compile_args)
         cmd += f" -DTEST_LINKER=1 {blder.mainsrc} -L{libdir} -l:{libpython} "
         cmd += "".join(["-L%s " % x for x in blder.libdirs])
