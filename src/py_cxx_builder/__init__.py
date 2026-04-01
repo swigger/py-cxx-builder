@@ -301,7 +301,7 @@ class CXXBuilder:
             if os.system(testcmd) != 0:
                 raise Exception('link error')
 
-        setup(ext_modules=[self._ext_module(self.name, libfn)])
+        setup(name=self.name, version=self.version, ext_modules=[self._ext_module(self.name, libfn)])
 
     def _need_compile(self, src, dst, kind=None):
         _ = self
