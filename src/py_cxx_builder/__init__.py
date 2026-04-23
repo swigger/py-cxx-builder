@@ -121,7 +121,10 @@ class ModiGCC:
         for m in blder.macros:
             opts.append("-D%s=%s" % (m[0], self.quote(m[1])))
         opts += blder.extra_compile_args
-        return "gcc -c %s -o %s %s" % (" ".join(opts), output, inputfn)
+        compiler = "gcc"
+        if sys.platform == "darwin":
+            compiler = "clang -arch x86_64 -arch arm64 -mmacos-version-min=10.15"
+        return f"{compiler} -c {' '.join(opts)} -o {output} {inputfn}"
 
     def lib_cmd(self, blder, name, objs):
         _ = self, blder
@@ -134,20 +137,29 @@ class ModiGCC:
         import sysconfig
         libpython = sysconfig.get_config_var('LDLIBRARY')
         libdir = sysconfig.get_config_var('LIBDIR')
-        cmd = ""
+        cmd = []
         for d in blder.include_dirs:
-            cmd += "-I%s " % d
+            cmd.append("-I%s" % d)
         for m in blder.macros:
-            cmd += "-D%s=%s " % (m[0], self.quote(m[1]))
-        cmd += " ".join(blder.extra_compile_args)
-        cmd += f" -DTEST_LINKER=1 {blder.mainsrc} -L{libdir} -l:{libpython} "
-        cmd += "".join(["-L%s " % x for x in blder.libdirs])
-        cmd += " ".join(self.link_args(blder, libfn)[1])
-        cmd = f"""gcc -o {dest} {cmd}"""
-        return cmd, dest
+            cmd.append("-D%s=%s" % (m[0], self.quote(m[1])))
+        cmd += blder.extra_compile_args
+        cmd += [f"-DTEST_LINKER=1", blder.mainsrc, f"-L{libdir}"]
+        if sys.platform == 'darwin':
+            cmd.extend([f"-F/Library/Frameworks", f"-framework Python", sysconfig.get_config_var('LIBS')])
+        else:
+            cmd.append(f"-l:{libpython}")
+        cmd += [f"-L{x}" for x in blder.libdirs]
+        cmd += self.link_args(blder, libfn)[1]
+        info = {"cmd": cmd, "dest": dest}
+        blder.on_hook('test_link_args', info)
+        cmd = f"""gcc -o {info['dest']} {" ".join(info['cmd'])}"""
+        return cmd, info['dest']
 
     def link_args(self, blder, slib):
-        arg1 = [f"-Wl,--whole-archive", slib, f"-Wl,--no-whole-archive"]
+        if sys.platform == 'darwin':
+            arg1 = [f'-Wl,-force_load,{slib}']
+        else:
+            arg1 = [f"-Wl,--whole-archive", slib, f"-Wl,--no-whole-archive"]
         for lib in blder.libs+blder.libs2:
             if isinstance(lib, tuple):
                 if lib[1]:
@@ -344,3 +356,6 @@ class CXXBuilder:
         seen = {''}
         seq = [x for x in self.libdirs if not (x in seen or seen.add(x))]
         return [x for x in seq if os.path.isdir(x)]
+
+    def on_hook(self, name, *args, **kwargs):
+        pass
