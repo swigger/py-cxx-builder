@@ -129,7 +129,8 @@ class ModiGCC:
     def lib_cmd(self, blder, name, objs):
         _ = self, blder
         fname = f"build/lib{name}.a"
-        return f"""ar rcs "{fname}" {" ".join(sorted(objs))}""", fname
+        prefix = "libtool -static -o" if sys.platform == "darwin" else "ar rcs"
+        return f"""{prefix} "{fname}" {" ".join(sorted(objs))}""", fname
 
     def test_cmd(self, blder, dest, libfn):
         if not blder._need_test_link:
@@ -145,7 +146,7 @@ class ModiGCC:
         cmd += blder.extra_compile_args
         cmd += [f"-DTEST_LINKER=1", blder.mainsrc, f"-L{libdir}"]
         if sys.platform == 'darwin':
-            cmd.extend([f"-F/Library/Frameworks", f"-framework Python", sysconfig.get_config_var('LIBS')])
+            cmd.extend(["-F"+sysconfig.get_config_var("PYTHONFRAMEWORKPREFIX"), f"-framework Python", sysconfig.get_config_var('LIBS')])
         else:
             cmd.append(f"-l:{libpython}")
         cmd += [f"-L{x}" for x in blder.libdirs]
